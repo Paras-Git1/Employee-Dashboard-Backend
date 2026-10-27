@@ -1,0 +1,29 @@
+{
+  "name": "employee-dashboard-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Employee Task Dashboard backend: API gateway, auth service, CRM and Helpdesk mocks, Postgres migrations",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "database",
+    "backend/crm-mock",
+    "backend/helpdesk-mock",
+    "backend/auth-service",
+    "backend/api-gateway"
+  ],
+  "scripts": {
+    "setup": "node setup-env.js && npm run init -w database && npm run migrate -w database",
+    "db:start": "npm run start -w database",
+    "db:stop": "npm run stop -w database",
+    "db:status": "npm run status -w database",
+    "db:migrate": "npm run migrate -w database",
+    "dev": "npm run db:start && concurrently -k -n crm,helpdesk,auth,api -c magenta,cyan,blue,green \"npm run dev -w backend/crm-mock\" \"npm run dev -w backend/helpdesk-mock\" \"npm run dev -w backend/auth-service\" \"npm run dev -w backend/api-gateway\"",
+    "test": "npm test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

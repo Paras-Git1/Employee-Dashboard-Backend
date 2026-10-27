@@ -1,0 +1,18 @@
+{
+  "_comment": "Starting data, loaded once. Dates are relative to reference_date and shifted to the time of seeding, so overdue / due-soon examples are realistic on the day you set the project up.",
+  "reference_date": "2026-10-25T09:00:00Z",
+  "tasks": [
+    {"id": "C-101", "subject": "Send renewal quote to Northwind Traders", "owner_email": "daniel.okafor@example.com", "due_date": "2026-10-24T17:00:00Z", "status": "open", "account_name": "Northwind Traders"},
+    {"id": "C-102", "subject": "Follow up on Contoso pilot feedback", "owner_email": "daniel.okafor@example.com", "due_date": "2026-10-25T16:00:00Z", "status": "in_progress", "account_name": "Contoso Ltd"},
+    {"id": "C-103", "subject": "Prepare Q4 pipeline review deck", "owner_email": "amira.hassan@example.com", "due_date": "2026-10-27T10:00:00Z", "status": "open", "account_name": "Internal"},
+    {"id": "C-104", "subject": "Schedule onboarding call with Fabrikam", "owner_email": "lucas.moreau@example.com", "due_date": "2026-10-23T12:00:00Z", "status": "open", "account_name": "Fabrikam Inc"},
+    {"id": "C-105", "subject": "Update contact list for Adventure Works", "owner_email": "kenji.watanabe@example.com", "due_date": "2026-10-30T09:00:00Z", "status": "open", "account_name": "Adventure Works"},
+    {"id": "C-106", "subject": "Quarterly business review with Tailspin Toys", "owner_email": "lucas.moreau@example.com", "due_date": "2026-11-12T14:00:00Z", "status": "open", "account_name": "Tailspin Toys"},
+    {"id": "C-107", "subject": "Clean up duplicate leads in EMEA region", "owner_email": "kenji.watanabe@example.com", "due_date": "2026-10-26T08:00:00Z", "status": "in_progress", "account_name": "Internal"},
+    {"id": "C-108", "subject": "Send signed MSA to Woodgrove Bank legal", "owner_email": "daniel.okafor@example.com", "due_date": "2026-10-20T17:00:00Z", "status": "done", "account_name": "Woodgrove Bank"},
+    {"id": "C-109", "subject": "Approve discount request for Litware", "owner_email": "amira.hassan@example.com", "due_date": "2026-10-25T20:00:00Z", "status": "open", "account_name": "Litware Inc"},
+    {"id": "C-110", "subject": "Log call notes from Proseware discovery", "owner_email": "lucas.moreau@example.com", "due_date": "2026-10-28T11:00:00Z", "status": "in_progress", "account_name": "Proseware"},
+    {"id": "C-111", "subject": "Draft expansion proposal for Coho Winery", "owner_email": "daniel.okafor@example.com", "due_date": "2026-11-04T10:00:00Z", "status": "open", "account_name": "Coho Winery"},
+    {"id": "C-112", "subject": "Reconcile closed-won deals for October", "owner_email": "kenji.watanabe@example.com", "due_date": "2026-10-22T15:00:00Z", "status": "done", "account_name": "Internal"}
+  ]
+}

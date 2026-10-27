@@ -1,0 +1,8 @@
+[
+  {"employee_id": 1, "name": "Amira Hassan", "email": "admin@example.com", "access": "manager", "password": "admin123"},
+  {"employee_id": 2, "name": "Daniel Okafor", "email": "daniel.okafor@example.com", "access": "employee"},
+  {"employee_id": 3, "name": "Priya Raman", "email": "employee@example.com", "access": "employee", "password": "employee123"},
+  {"employee_id": 4, "name": "Lucas Moreau", "email": "lucas.moreau@example.com", "access": "employee"},
+  {"employee_id": 5, "name": "Sofia Lindqvist", "email": "sofia.lindqvist@example.com", "access": "employee"},
+  {"employee_id": 6, "name": "Kenji Watanabe", "email": "kenji.watanabe@example.com", "access": "employee"}
+]

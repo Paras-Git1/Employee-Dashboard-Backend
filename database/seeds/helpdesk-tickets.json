@@ -1,0 +1,19 @@
+{
+  "_comment": "Starting data, loaded once. Dates are relative to reference_date and shifted to the time of seeding, so overdue / due-soon examples are realistic on the day you set the project up.",
+  "reference_date": "2026-10-25T09:00:00Z",
+  "tickets": [
+    {"ticket_id": "T-201", "title": "Laptop will not boot after OS update", "assignee_email": "sofia.lindqvist@example.com", "sla_due_at": "2026-10-25T13:00:00Z", "state": "open", "urgency": 4},
+    {"ticket_id": "T-202", "title": "Customer cannot reset password on portal", "assignee_email": "priya.raman@example.com", "sla_due_at": "2026-10-24T18:00:00Z", "state": "new", "urgency": 3},
+    {"ticket_id": "T-203", "title": "Invoice PDF shows wrong currency", "assignee_email": "priya.raman@example.com", "sla_due_at": "2026-10-27T09:00:00Z", "state": "pending", "urgency": 2},
+    {"ticket_id": "T-204", "title": "VPN access failing for finance team", "assignee_email": "sofia.lindqvist@example.com", "sla_due_at": "2026-10-25T21:00:00Z", "state": "open", "urgency": 4},
+    {"ticket_id": "T-205", "title": "Request new monitor for design desk", "assignee_email": "sofia.lindqvist@example.com", "sla_due_at": "2026-11-08T09:00:00Z", "state": "new", "urgency": 1},
+    {"ticket_id": "T-206", "title": "API rate limit errors reported by Contoso", "assignee_email": "priya.raman@example.com", "sla_due_at": "2026-10-26T06:00:00Z", "state": "open", "urgency": 4},
+    {"ticket_id": "T-207", "title": "Export to CSV truncates long names", "assignee_email": "priya.raman@example.com", "sla_due_at": "2026-10-31T12:00:00Z", "state": "pending", "urgency": 2},
+    {"ticket_id": "T-208", "title": "Set up CRM access for new account executive", "assignee_email": "amira.hassan@example.com", "sla_due_at": "2026-10-26T15:00:00Z", "state": "new", "urgency": 3},
+    {"ticket_id": "T-209", "title": "Shared drive permissions for Fabrikam project", "assignee_email": "lucas.moreau@example.com", "sla_due_at": "2026-10-28T10:00:00Z", "state": "open", "urgency": 2},
+    {"ticket_id": "T-210", "title": "Printer on floor 3 jams on duplex", "assignee_email": "sofia.lindqvist@example.com", "sla_due_at": "2026-10-21T10:00:00Z", "state": "solved", "urgency": 1},
+    {"ticket_id": "T-211", "title": "Mobile app crashes on Android 15 login", "assignee_email": "priya.raman@example.com", "sla_due_at": "2026-10-23T09:00:00Z", "state": "pending", "urgency": 3},
+    {"ticket_id": "T-212", "title": "Expense report sync stuck since Monday", "assignee_email": "kenji.watanabe@example.com", "sla_due_at": "2026-10-29T17:00:00Z", "state": "new", "urgency": 2},
+    {"ticket_id": "T-213", "title": "Two-factor codes not arriving by SMS", "assignee_email": "daniel.okafor@example.com", "sla_due_at": "2026-10-22T09:00:00Z", "state": "solved", "urgency": 3}
+  ]
+}

@@ -1,0 +1,8 @@
+[
+  {"id": 1, "name": "Amira Hassan", "email": "amira.hassan@example.com", "role": "Team Lead"},
+  {"id": 2, "name": "Daniel Okafor", "email": "daniel.okafor@example.com", "role": "Account Executive"},
+  {"id": 3, "name": "Priya Raman", "email": "priya.raman@example.com", "role": "Support Engineer"},
+  {"id": 4, "name": "Lucas Moreau", "email": "lucas.moreau@example.com", "role": "Customer Success Manager"},
+  {"id": 5, "name": "Sofia Lindqvist", "email": "sofia.lindqvist@example.com", "role": "IT Support Specialist"},
+  {"id": 6, "name": "Kenji Watanabe", "email": "kenji.watanabe@example.com", "role": "Sales Operations Analyst"}
+]
