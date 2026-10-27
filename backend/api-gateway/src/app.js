@@ -1,9 +1,12 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
+import helmet from 'helmet';
 import { requireAuth } from './middleware/requireAuth.js';
 import { employeesRouter } from './routes/employees.js';
 import { eventsRouter } from './routes/events.js';
+import { sourcePagesRouter } from './routes/sourcePages.js';
 import { tasksRouter } from './routes/tasks.js';
 import { SourceError } from './services/clients/httpClient.js';
 import { HttpError } from './services/errors.js';
@@ -11,6 +14,8 @@ import { HttpError } from './services/errors.js';
 export function createApp({ config, taskService, employeeRepo, events, healthCheck = async () => true }) {
   const app = express();
   app.disable('x-powered-by');
+  if (config.trustProxy) app.set('trust proxy', config.trustProxy);
+  app.use(helmet());
   app.use(cors({ origin: config.corsOrigins, credentials: true }));
   app.use(express.json({ limit: '10kb' }));
   app.use(cookieParser());
@@ -25,11 +30,15 @@ export function createApp({ config, taskService, employeeRepo, events, healthChe
   });
 
   const auth = requireAuth({ jwtSecret: config.jwtSecret, cookieName: config.cookieName });
+  if (config.rateLimitPerMinute) {
+    app.use('/api', rateLimit({ windowMs: 60_000, limit: config.rateLimitPerMinute, standardHeaders: 'draft-8', legacyHeaders: false }));
+  }
   app.use('/api/tasks', auth, tasksRouter({ taskService }));
   app.use('/api/employees', auth, employeesRouter({ employeeRepo }));
   if (events) app.use('/api/events', auth, eventsRouter({ events }));
 
   app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
+  app.use(sourcePagesRouter({ taskService, jwtSecret: config.jwtSecret, cookieName: config.cookieName, dashboardUrl: config.dashboardUrl }));
 
   app.use((err, req, res, next) => {
     if (err instanceof HttpError) return res.status(err.status).json({ error: err.message });

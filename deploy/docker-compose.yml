@@ -1,0 +1,135 @@
+# Production stack. Values come from .env next to this file (written by deploy.sh).
+# Only Caddy publishes ports; Postgres and the mock services stay on the internal network.
+x-node: &node
+  image: ${IMAGE}
+  restart: unless-stopped
+  init: true
+  networks: [internal]
+  logging:
+    driver: json-file
+    options: { max-size: 10m, max-file: '3' }
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_AUTH_PASSWORD: ${PG_AUTH_PASSWORD}
+      PG_API_PASSWORD: ${PG_API_PASSWORD}
+      PG_CRM_PASSWORD: ${PG_CRM_PASSWORD}
+      PG_HELPDESK_PASSWORD: ${PG_HELPDESK_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [internal]
+
+  migrate:
+    <<: *node
+    restart: 'no'
+    command: ['node', 'database/migrate.js']
+    profiles: [tools]
+    environment:
+      NODE_ENV: production
+      SEED_PASSWORD: ${SEED_PASSWORD}
+      AUTH_DATABASE_URL: postgres://auth_svc:${PG_AUTH_PASSWORD}@postgres:5432/taskdash_auth
+      API_DATABASE_URL: postgres://api_svc:${PG_API_PASSWORD}@postgres:5432/taskdash_api
+      CRM_DATABASE_URL: postgres://crm_svc:${PG_CRM_PASSWORD}@postgres:5432/taskdash_crm
+      HELPDESK_DATABASE_URL: postgres://helpdesk_svc:${PG_HELPDESK_PASSWORD}@postgres:5432/taskdash_helpdesk
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  crm-mock:
+    <<: *node
+    command: ['node', 'backend/crm-mock/src/server.js']
+    environment:
+      PORT: 4001
+      DATABASE_URL: postgres://crm_svc:${PG_CRM_PASSWORD}@postgres:5432/taskdash_crm
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+      DASHBOARD_URL: ${DASHBOARD_URL}
+      FAIL_MODE: ${CRM_FAIL_MODE:-off}
+      ENABLE_FAIL_CONTROL: ${ENABLE_FAIL_CONTROL:-false}
+    healthcheck: &health
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:$$PORT/health >/dev/null || exit 1']
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  helpdesk-mock:
+    <<: *node
+    command: ['node', 'backend/helpdesk-mock/src/server.js']
+    environment:
+      PORT: 4002
+      DATABASE_URL: postgres://helpdesk_svc:${PG_HELPDESK_PASSWORD}@postgres:5432/taskdash_helpdesk
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+      DASHBOARD_URL: ${DASHBOARD_URL}
+      FAIL_MODE: ${HELPDESK_FAIL_MODE:-off}
+      ENABLE_FAIL_CONTROL: ${ENABLE_FAIL_CONTROL:-false}
+    healthcheck: *health
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  auth-service:
+    <<: *node
+    command: ['node', 'backend/auth-service/src/server.js']
+    environment:
+      PORT: 4003
+      DATABASE_URL: postgres://auth_svc:${PG_AUTH_PASSWORD}@postgres:5432/taskdash_auth
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      SESSION_COOKIE: ${SESSION_COOKIE:-__Host-td_session}
+      CORS_ORIGIN: ${DASHBOARD_URL}
+      COOKIE_SAMESITE: lax
+      TRUST_PROXY: ${TRUST_PROXY:-2}
+    healthcheck: *health
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api-gateway:
+    <<: *node
+    command: ['node', 'backend/api-gateway/src/server.js']
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://api_svc:${PG_API_PASSWORD}@postgres:5432/taskdash_api
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_COOKIE: ${SESSION_COOKIE:-__Host-td_session}
+      CORS_ORIGIN: ${DASHBOARD_URL}
+      DASHBOARD_URL: ${DASHBOARD_URL}
+      CRM_BASE_URL: http://crm-mock:4001
+      HELPDESK_BASE_URL: http://helpdesk-mock:4002
+      CRM_PUBLIC_URL: ${DASHBOARD_URL}
+      HELPDESK_PUBLIC_URL: ${DASHBOARD_URL}
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+      TRUST_PROXY: ${TRUST_PROXY:-2}
+    healthcheck: *health
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [api-gateway, auth-service]
+    networks: [internal]
+
+networks:
+  internal:
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

@@ -54,4 +54,17 @@ describe('CRM mock', () => {
     await request(app).get('/crm/tasks').expect(500);
     await request(app).put('/__control/fail-mode').send({ mode: 'bogus' }).expect(400);
   });
+
+  it('requires the service token when one is configured, except for /health', async () => {
+    const secured = createApp({ repo: memoryRepo(), serviceToken: 's3cret' });
+    await request(secured).get('/health').expect(200);
+    await request(secured).get('/crm/tasks').expect(401);
+    await request(secured).get('/crm/tasks/C-101').set('Authorization', 'Bearer wrong').expect(401);
+    await request(secured).get('/crm/tasks').set('Authorization', 'Bearer s3cret').expect(200);
+  });
+
+  it('removes the fail-mode switch when control is disabled', async () => {
+    const locked = createApp({ repo: memoryRepo(), enableControl: false });
+    await request(locked).put('/__control/fail-mode').send({ mode: 'error' }).expect(404);
+  });
 });

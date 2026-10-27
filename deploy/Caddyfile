@@ -1,0 +1,30 @@
+{
+	servers {
+		trusted_proxies static 0.0.0.0/0 ::/0
+	}
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	handle /auth/* {
+		reverse_proxy auth-service:4003
+	}
+	handle /api/* {
+		reverse_proxy api-gateway:3001 {
+			flush_interval -1
+		}
+	}
+	handle /crm/tasks/* {
+		reverse_proxy api-gateway:3001
+	}
+	handle /helpdesk/tickets/* {
+		reverse_proxy api-gateway:3001
+	}
+	handle /health {
+		reverse_proxy api-gateway:3001
+	}
+	handle {
+		respond 404
+	}
+}

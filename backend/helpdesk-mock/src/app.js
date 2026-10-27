@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import express from 'express';
 import { detailPage, notFoundPage } from './detailPage.js';
 import { validateTicket } from './validate.js';
@@ -5,10 +6,22 @@ import { validateTicket } from './validate.js';
 export const FAIL_MODES = ['off', 'error', 'slow', 'malformed'];
 
 
-export function createApp({ repo, failMode = 'off', slowDelayMs = 5000, dashboardUrl = 'http://localhost:5173' }) {
+// serviceToken: when set, every route except /health requires "Authorization: Bearer <token>"
+// (only the API gateway knows it). enableControl: false removes the fail-mode switch.
+export function createApp({ repo, failMode = 'off', slowDelayMs = 5000, dashboardUrl = 'http://localhost:5173', serviceToken, enableControl = true }) {
   const state = { failMode: FAIL_MODES.includes(failMode) ? failMode : 'off' };
   const app = express();
   app.use(express.json({ limit: '10kb' }));
+
+  if (serviceToken) {
+    const expected = Buffer.from(`Bearer ${serviceToken}`);
+    app.use((req, res, next) => {
+      if (req.path === '/health') return next();
+      const given = Buffer.from(req.get('authorization') ?? '');
+      if (given.length === expected.length && timingSafeEqual(given, expected)) return next();
+      res.status(401).json({ error: 'Unauthorized' });
+    });
+  }
 
   app.get('/health', async (req, res) => {
     try {
@@ -20,7 +33,7 @@ export function createApp({ repo, failMode = 'off', slowDelayMs = 5000, dashboar
   });
 
   // Switch failure simulation at runtime: PUT /__control/fail-mode {"mode":"slow"}
-  app.put('/__control/fail-mode', (req, res) => {
+  if (enableControl) app.put('/__control/fail-mode', (req, res) => {
     const mode = req.body?.mode;
     if (!FAIL_MODES.includes(mode)) return res.status(400).json({ error: `mode must be one of ${FAIL_MODES.join(', ')}` });
     state.failMode = mode;

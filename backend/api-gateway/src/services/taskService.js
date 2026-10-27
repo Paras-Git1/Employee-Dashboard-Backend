@@ -145,5 +145,11 @@ export function createTaskService({ sources, employeeRepo, events, cacheTtlMs = 
     publish('deleted', before ?? { taskKey }, actor);
   }
 
-  return { getTasks, getTask, createTask, updateTask, deleteTask, clearCache: () => cache.clear() };
+  // HTML detail page from the source system, returned as { status, html }.
+  async function fetchSourcePage(taskKey) {
+    const { source, sourceId } = sourceForKey(taskKey);
+    return source.fetchPage(sourceId);
+  }
+
+  return { getTasks, getTask, createTask, updateTask, deleteTask, fetchSourcePage, clearCache: () => cache.clear() };
 }

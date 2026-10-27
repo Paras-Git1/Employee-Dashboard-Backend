@@ -7,7 +7,10 @@ const slowDelayMs = Number(process.env.SLOW_DELAY_MS) || 5000;
 const databaseUrl = process.env.DATABASE_URL || 'postgres://taskdash:taskdash@localhost:5434/taskdash_helpdesk';
 
 const dashboardUrl = process.env.DASHBOARD_URL || 'http://localhost:5173';
+const serviceToken = process.env.SERVICE_TOKEN || undefined;
+// The fail-mode switch is for demos; off in production unless explicitly enabled.
+const enableControl = process.env.NODE_ENV !== 'production' || process.env.ENABLE_FAIL_CONTROL === 'true';
 
-createApp({ dashboardUrl, repo: createTicketRepo(databaseUrl), failMode, slowDelayMs }).listen(port, () => {
+createApp({ dashboardUrl, repo: createTicketRepo(databaseUrl), failMode, slowDelayMs, serviceToken, enableControl }).listen(port, () => {
   console.log(`Helpdesk mock listening on http://localhost:${port} (FAIL_MODE=${failMode})`);
 });

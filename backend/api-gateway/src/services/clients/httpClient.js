@@ -9,13 +9,17 @@ export class SourceError extends Error {
   }
 }
 
-export async function requestJson({ source, label, url, timeoutMs, method = 'GET', body, fetchImpl = fetch }) {
-  let response;
+// serviceToken is sent as a bearer token; the sources reject calls without it when they are configured with one.
+async function send({ source, label, url, timeoutMs, method = 'GET', body, accept, serviceToken, fetchImpl = fetch }) {
   try {
-    response = await fetchImpl(url, {
+    return await fetchImpl(url, {
       method,
       signal: AbortSignal.timeout(timeoutMs),
-      headers: { accept: 'application/json', ...(body ? { 'content-type': 'application/json' } : {}) },
+      headers: {
+        accept,
+        ...(body ? { 'content-type': 'application/json' } : {}),
+        ...(serviceToken ? { authorization: `Bearer ${serviceToken}` } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (err) {
@@ -24,6 +28,11 @@ export async function requestJson({ source, label, url, timeoutMs, method = 'GET
     }
     throw new SourceError(source, `${label} service is unreachable`, { cause: err });
   }
+}
+
+export async function requestJson(options) {
+  const { source, label } = options;
+  const response = await send({ ...options, accept: 'application/json' });
   if (response.status === 204) return null;
 
   let data;
@@ -47,4 +56,10 @@ export async function fetchJson(options) {
   const body = await requestJson(options);
   if (!Array.isArray(body)) throw new SourceError(options.source, `${options.label} service returned invalid data`);
   return body;
+}
+
+// Fetches a human-facing HTML page from a source. Returns { status, html }.
+export async function requestHtml(options) {
+  const response = await send({ ...options, accept: 'text/html' });
+  return { status: response.status, html: await response.text() };
 }

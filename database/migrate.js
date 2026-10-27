@@ -40,10 +40,14 @@ const targets = [
       const { count } = await db('users').count('* as count').first();
       if (Number(count) > 0) return 0;
       const users = readSeed('auth-users.json');
-      const defaultHash = await bcrypt.hash(process.env.SEED_PASSWORD || 'Password123!', 12);
+      // In production nobody gets a password from the seed file: every account uses SEED_PASSWORD, which must be strong.
+      const production = process.env.NODE_ENV === 'production';
+      const seedPassword = process.env.SEED_PASSWORD || (production ? '' : 'Password123!');
+      if (production && seedPassword.length < 12) throw new Error('Set SEED_PASSWORD (at least 12 characters) before seeding in production.');
+      const defaultHash = await bcrypt.hash(seedPassword, 12);
       const rows = [];
       for (const { password, ...u } of users) {
-        rows.push({ ...u, email: u.email.toLowerCase(), password_hash: password ? await bcrypt.hash(password, 12) : defaultHash });
+        rows.push({ ...u, email: u.email.toLowerCase(), password_hash: password && !production ? await bcrypt.hash(password, 12) : defaultHash });
       }
       await db('users').insert(rows);
       return users.length;

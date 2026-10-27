@@ -4,6 +4,13 @@ function required(name) {
   return value;
 }
 
+// TRUST_PROXY: number of proxies in front of the app (e.g. 2 for Vercel -> Caddy), so req.ip is the real client.
+function parseTrustProxy(value) {
+  if (value === undefined || value === '' || value === 'false') return false;
+  if (value === 'true') return true;
+  return /^\d+$/.test(value) ? Number(value) : value;
+}
+
 export function loadConfig() {
   return {
     port: Number(process.env.PORT) || 4003,
@@ -17,5 +24,7 @@ export function loadConfig() {
     corsOrigins: (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map((o) => o.trim()).filter(Boolean),
     cookieSameSite: process.env.COOKIE_SAMESITE || 'lax',
     cookieDomain: process.env.COOKIE_DOMAIN || undefined,
+    trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+    rateLimitPerMinute: Number(process.env.RATE_LIMIT_PER_MINUTE) || 60,
   };
 }
